@@ -1,13 +1,16 @@
 import Head from 'next/head';
+import Layout from '../Component/Layout';
 
 export default function Contact() {
   return (
-    <div>
-      <Head>
-        <title>Contact Page</title>
-      </Head>
+    <Layout>
+      <div>
+        <Head>
+          <title>Contact Page</title>
+        </Head>
 
-      <p>These thing are Contact inside.</p>
-    </div>
+        <p>These thing are Contact inside.</p>
+      </div>
+    </Layout>
   );
 }

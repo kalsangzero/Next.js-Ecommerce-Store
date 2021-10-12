@@ -2,6 +2,7 @@ import { css } from '@emotion/react';
 import Cookies from 'js-cookie';
 import Head from 'next/head';
 import { useState } from 'react';
+import Layout from '../../Component/Layout';
 import { getParsedCookie, setParsedCookie } from '../../util/cookies';
 
 // [user].js and any name after user/ this will be directed to this [user] ppage
@@ -39,22 +40,27 @@ export default function User(props) {
   // user is the name of the file
   // router.query is an object with an property user
   // const { product } = router.query;
-  // would show whatever the name you typed
-
-  const [cartNumber, setCartNumber] = useState('');
+  // would show whatever the name you type
 
   const [like, setLike] = useState(getParsedCookie('like') || []);
   // even if someone deletes the cookies || this will allow it displayed  and in console loged as undefined
   const [cartItems, setCartItems] = useState(
     getParsedCookie('cartItems') || [],
   );
+  // changes to CART with quantity(below: itemQuantity)
 
+  const userCookieObject = cartItems.find(
+    (cookieObj) => cookieObj.id === Number(props.singleUser.id),
+  );
+  const initialquantity = userCookieObject ? userCookieObject.quantity : 1;
+
+  const [itemQuantity, setItemQuantity] = useState(initialquantity);
   // the value is in string
   console.log(Cookies.get('like'));
   console.log(getParsedCookie('like'));
   // this gives me number already parsed
 
-  function makeCart() {
+  function likedFucntion() {
     // check the current state of cookies
     const currentCookie = getParsedCookie('like') || [];
     // [3]
@@ -81,65 +87,106 @@ export default function User(props) {
   function clickHandler() {
     const currentCookie = getParsedCookie('cartItems') || [];
 
-    const isCarted = currentCookie.some((id) => {
-      return id === Number(props.singleUser.id);
+    const isCarted = currentCookie.some((cookiesObject) => {
+      return cookiesObject.id === Number(props.singleUser.id);
     });
     let newCartCookie;
     if (isCarted) {
       // remove the user
       newCartCookie = currentCookie.filter(
-        (id) => id !== Number(props.singleUser.id),
+        (cookiesObject) => cookiesObject.id !== Number(props.singleUser.id),
       );
+      setItemQuantity(1);
     } else {
       // add the user
-      newCartCookie = [...currentCookie, Number(props.singleUser.id)];
+      newCartCookie = [
+        ...currentCookie,
+        { id: Number(props.singleUser.id), quantity: 1 },
+      ];
     }
     // update state
     setParsedCookie('cartItems', newCartCookie);
     setCartItems(newCartCookie);
+    console.log(getParsedCookie('cartItems'));
+  }
+  // add and reduce quantity
+  // get old version of an array
+  // get the object in the array
+  // set the new version of the array
+  function quantityReduceHandler() {
+    const currentCookie = getParsedCookie('cartItems') || [];
+    const cookieObjFound = currentCookie.find(
+      (cookieObj) => cookieObj.id === Number(props.singleUser.id),
+    );
+    cookieObjFound.quantity >= 2
+      ? (cookieObjFound.quantity -= 1)
+      : (cookieObjFound.quantity = 1);
+    setParsedCookie('cartItems', currentCookie);
+    setItemQuantity(cookieObjFound.quantity);
+  }
+  function quantityAddHandler() {
+    const currentCookie = getParsedCookie('cartItems') || [];
+    const cookieObjFound = currentCookie.find(
+      (cookieObj) => cookieObj.id === Number(props.singleUser.id),
+    );
+    cookieObjFound.quantity += 1;
+    setParsedCookie('cartItems', currentCookie);
+    setItemQuantity(cookieObjFound.quantity);
   }
 
   return (
-    <div css={baseStyle}>
-      <Head>
-        <title>Personal User Page</title>
-      </Head>
-      {/* Layout is already applied so we dont have to put the layout here.
+    <Layout>
+      <div css={baseStyle}>
+        <Head>
+          <title>Personal User Page</title>
+        </Head>
+        {/* Layout is already applied so we dont have to put the layout here.
       The thing i want to say is below that every products with image could be make
       */}
-      <h1>{props.singleUser.name}</h1>
-      <div css={innerContent}>
-        <img
-          css={singleImage}
-          src={props.singleUser.img}
-          alt={props.singleUser.name}
-        />
-        <div>
-          <p style={{ padding: '80px 100px' }}>{props.singleUser.desc}</p>
-          <p style={{ fontWeight: 'bold' }}>
-            Amount : {props.singleUser.price.currency}
-            {props.singleUser.price.amount}
-          </p>
+        <h1>{props.singleUser.name}</h1>
+        <div css={innerContent}>
+          <img
+            css={singleImage}
+            src={props.singleUser.img}
+            alt={props.singleUser.name}
+          />
           <div>
-            <button onClick={() => setCartNumber(cartNumber - 1)}>-</button>
+            <p style={{ padding: '80px 100px' }}>{props.singleUser.descx}</p>
+            <p style={{ fontWeight: 'bold' }}>
+              Amount : €{props.singleUser.price}
+            </p>
+            <br />
 
-            {cartNumber ? cartNumber : 0}
-            <button onClick={() => setCartNumber(cartNumber + 1)}>+</button>
+            <button css={buttonStyle} onClick={clickHandler}>
+              {cartItems.some(
+                (cookiesObject) =>
+                  Number(props.singleUser.id) === cookiesObject.id,
+              )
+                ? 'UNDO CART'
+                : 'ADD To CART'}
+            </button>
+            {cartItems.some(
+              (cookiesObject) =>
+                Number(props.singleUser.id) === cookiesObject.id,
+            ) ? (
+              <div>
+                <div>
+                  <p>Select Quantity</p>
+                  <button onClick={quantityReduceHandler}>-</button>
+                  {itemQuantity ? itemQuantity : 0}
+                  <button onClick={quantityAddHandler}>+</button>
+                </div>
+                <button css={buttonStyle} onClick={likedFucntion}>
+                  {like.some((id) => Number(props.singleUser.id) === id)
+                    ? 'liked'
+                    : 'notliked'}
+                </button>
+              </div>
+            ) : null}
           </div>
-          <button css={buttonStyle} onClick={makeCart}>
-            {like.some((id) => Number(props.singleUser.id) === id)
-              ? 'liked'
-              : 'notliked'}
-          </button>
-          <br />
-          <button css={buttonStyle} onClick={clickHandler}>
-            {cartItems.some((id) => Number(props.singleUser.id) === id)
-              ? 'CARTED'
-              : 'ADD To CART'}
-          </button>
         </div>
       </div>
-    </div>
+    </Layout>
   );
 }
 

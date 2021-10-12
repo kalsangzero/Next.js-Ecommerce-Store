@@ -1,6 +1,7 @@
 import { css } from '@emotion/react';
 import Head from 'next/head';
 import Link from 'next/link';
+import Layout from '../../Component/Layout';
 
 // const products = [
 //   { id: '1', name: 'Sukuna', img: '../public/sukuna.gif' },
@@ -34,35 +35,37 @@ const singleImage = css`
 `;
 export default function Users(props) {
   return (
-    <div style={{ margin: '100px 50px' }}>
-      <Head>
-        <title>Products</title>
-      </Head>
-      {/* Layout is already applied so we dont have to put the layout here */}
-      <h2 css={heading}>NFTs (Non-Fungible Tokens)</h2>
-      <div css={productLayout}>
-        {/* props is collected from userServersite with name as userList
+    <Layout>
+      <div style={{ margin: '100px 50px' }}>
+        <Head>
+          <title>Products</title>
+        </Head>
+        {/* Layout is already applied so we dont have to put the layout here */}
+        <h2 css={heading}>NFTs (Non-Fungible Tokens)</h2>
+        <div css={productLayout}>
+          {/* props is collected from userServersite with name as userList
         and here we use props which has name userList and then map each ..which is shown in the list */}
-        {props.likedItem.map((user) => {
-          // actually props.liked user
-          return (
-            <div css={singleImage} key={`user-li-${user.id}`}>
-              <div>{user.like ? '🧡' : '🤍'}</div>
-              <br />
-              <Link href={`/productsFolder/${user.id}`}>
-                <a>
-                  <img
-                    style={{ borderRadius: '5px' }}
-                    src={user.img}
-                    alt={user.name}
-                  />
-                </a>
-              </Link>
-            </div>
-          );
-        })}
+          {props.likedItem.map((user) => {
+            // actually props.liked user
+            return (
+              <div css={singleImage} key={`user-li-${user.id}`}>
+                <div>{user.like ? '🧡' : '🤍'}</div>
+                <br />
+                <Link href={`/productsFolder/${user.id}`}>
+                  <a>
+                    <img
+                      style={{ borderRadius: '5px' }}
+                      src={user.img}
+                      alt={user.name}
+                    />
+                  </a>
+                </Link>
+              </div>
+            );
+          })}
+        </div>
       </div>
-    </div>
+    </Layout>
   );
 }
 
@@ -72,14 +75,16 @@ export async function getServerSideProps(context) {
   // and there is a specific way of importing the database
   // get server site only work on pages and not components
   // to get access the request (context)
-  const { products } = await import('../../util/database');
+  const { getProducts } = await import('../../util/database');
+  const products = await getProducts();
 
   const cookies = context.req.cookies.like || '[]';
   const like = JSON.parse(cookies);
   // self like from cookies
-  console.log('likeeeeeee', like);
+
   // to use it in the li, we have to use props
   // shown in terminal
+
   const likedItem = products.map((user) => {
     return {
       ...user,
