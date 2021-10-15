@@ -5,7 +5,7 @@ import { useState } from 'react';
 import Layout from '../../Component/Layout';
 import { getParsedCookie, setParsedCookie } from '../../util/cookies';
 
-// [user].js and any name after user/ this will be directed to this [user] ppage
+// [product].js and any name after product/ this will be directed to this [product] ppage
 
 export default function User(props) {
   // this is to get url query in the frontend
@@ -13,6 +13,17 @@ export default function User(props) {
   const buttonStyle = css`
     margin: 10px;
     padding: 5px;
+  `;
+  const likeButtonStyle = css`
+    float: left;
+    margin-top: 18px;
+    outline: none;
+    border: none;
+    background-color: white;
+    font-size: 18px;
+    :hover {
+      font-size: 22px;
+    }
   `;
   const baseStyle = css`
     justify-content: center;
@@ -37,8 +48,8 @@ export default function User(props) {
     display: flex;
   `;
   // const router = useRouter();
-  // user is the name of the file
-  // router.query is an object with an property user
+  // product is the name of the file
+  // router.query is an object with an property product
   // const { product } = router.query;
   // would show whatever the name you type
 
@@ -50,14 +61,14 @@ export default function User(props) {
   // changes to CART with quantity(below: itemQuantity)
 
   const userCookieObject = cartItems.find(
-    (cookieObj) => cookieObj.id === Number(props.singleUser.id),
+    (cookieObj) => cookieObj.id === props.product.id,
   );
   const initialquantity = userCookieObject ? userCookieObject.quantity : 1;
 
   const [itemQuantity, setItemQuantity] = useState(initialquantity);
   // the value is in string
-  console.log(Cookies.get('like'));
-  console.log(getParsedCookie('like'));
+  // console.log(Cookies.get('like'));
+  // console.log(getParsedCookie('like'));
   // this gives me number already parsed
 
   function likedFucntion() {
@@ -66,18 +77,16 @@ export default function User(props) {
     // [3]
     // update the cookie (add if its  not there, remove if its there)
     const isUserLiked = currentCookie.some((id) => {
-      return id === Number(props.singleUser.id);
+      return id === Number(props.product.id);
       // id that comes from the Url
     });
     let newCookie;
     if (isUserLiked) {
-      // remover the user
-      newCookie = currentCookie.filter(
-        (id) => id !== Number(props.singleUser.id),
-      );
+      // remover the product
+      newCookie = currentCookie.filter((id) => id !== props.product.id);
     } else {
-      // add the user
-      newCookie = [...currentCookie, Number(props.singleUser.id)];
+      // add the product
+      newCookie = [...currentCookie, props.product.id];
     }
     // update state
     setParsedCookie('like', newCookie);
@@ -88,21 +97,18 @@ export default function User(props) {
     const currentCookie = getParsedCookie('cartItems') || [];
 
     const isCarted = currentCookie.some((cookiesObject) => {
-      return cookiesObject.id === Number(props.singleUser.id);
+      return cookiesObject.id === props.product.id;
     });
     let newCartCookie;
     if (isCarted) {
-      // remove the user
+      // remove the product
       newCartCookie = currentCookie.filter(
-        (cookiesObject) => cookiesObject.id !== Number(props.singleUser.id),
+        (cookiesObject) => cookiesObject.id !== props.product.id,
       );
       setItemQuantity(1);
     } else {
-      // add the user
-      newCartCookie = [
-        ...currentCookie,
-        { id: Number(props.singleUser.id), quantity: 1 },
-      ];
+      // add the product
+      newCartCookie = [...currentCookie, { id: props.product.id, quantity: 1 }];
     }
     // update state
     setParsedCookie('cartItems', newCartCookie);
@@ -116,7 +122,7 @@ export default function User(props) {
   function quantityReduceHandler() {
     const currentCookie = getParsedCookie('cartItems') || [];
     const cookieObjFound = currentCookie.find(
-      (cookieObj) => cookieObj.id === Number(props.singleUser.id),
+      (cookieObj) => cookieObj.id === props.product.id,
     );
     cookieObjFound.quantity >= 2
       ? (cookieObjFound.quantity -= 1)
@@ -127,7 +133,7 @@ export default function User(props) {
   function quantityAddHandler() {
     const currentCookie = getParsedCookie('cartItems') || [];
     const cookieObjFound = currentCookie.find(
-      (cookieObj) => cookieObj.id === Number(props.singleUser.id),
+      (cookieObj) => cookieObj.id === props.product.id,
     );
     cookieObjFound.quantity += 1;
     setParsedCookie('cartItems', currentCookie);
@@ -143,44 +149,40 @@ export default function User(props) {
         {/* Layout is already applied so we dont have to put the layout here.
       The thing i want to say is below that every products with image could be make
       */}
-        <h1>{props.singleUser.name}</h1>
+        <h1>{props.product.name}</h1>
         <div css={innerContent}>
           <img
             css={singleImage}
-            src={props.singleUser.img}
-            alt={props.singleUser.name}
+            src={`/${props.product.name}.gif`}
+            alt={props.product.name}
           />
-          <div>
-            <p style={{ padding: '80px 100px' }}>{props.singleUser.descx}</p>
+          <div style={{ marginTop: '24px' }}>
+            <button css={likeButtonStyle} onClick={likedFucntion}>
+              {like.some((id) => props.product.id === id) ? '🧡' : '🤍'}
+            </button>
+            <p style={{ padding: '60px 100px' }}>{props.product.descx}</p>
             <p style={{ fontWeight: 'bold' }}>
-              Amount : €{props.singleUser.price}
+              Amount : €{props.product.price}
             </p>
             <br />
 
             <button css={buttonStyle} onClick={clickHandler}>
               {cartItems.some(
-                (cookiesObject) =>
-                  Number(props.singleUser.id) === cookiesObject.id,
+                (cookiesObject) => props.product.id === cookiesObject.id,
               )
                 ? 'UNDO CART'
                 : 'ADD To CART'}
             </button>
             {cartItems.some(
-              (cookiesObject) =>
-                Number(props.singleUser.id) === cookiesObject.id,
+              (cookiesObject) => props.product.id === cookiesObject.id,
             ) ? (
               <div>
                 <div>
                   <p>Select Quantity</p>
                   <button onClick={quantityReduceHandler}>-</button>
-                  {itemQuantity ? itemQuantity : 0}
+                  {itemQuantity || 0}
                   <button onClick={quantityAddHandler}>+</button>
                 </div>
-                <button css={buttonStyle} onClick={likedFucntion}>
-                  {like.some((id) => Number(props.singleUser.id) === id)
-                    ? 'liked'
-                    : 'notliked'}
-                </button>
               </div>
             ) : null}
           </div>
@@ -193,23 +195,24 @@ export default function User(props) {
 export async function getServerSideProps(context) {
   // getserver recieve context object(nextjs) and it has lots info about request  and could be used here
 
-  const { products } = await import('../../util/database');
+  // create a single function to get single product rather than getting all
+  const { getProduct } = await import('../../util/database');
+  const product = await getProduct(context.query.productId);
+  // comes back and object
 
-  const idFromUrl = context.query.productId;
-  console.log(context.query.productId);
   // in order to get the object i want when i hav arrayobject and id
   //  method used is : find to find the right object
-  const singleUser = products.find((user) => {
-    return idFromUrl === user.id;
-  });
+  // const.product = products.find((product) => {
+  //   return idFromUrl === product.id;
+  // });
   // returns the searched object eg.{ id: '3', name: 'YourName', img: '../public/sukuna.gif' },
 
   // product : name of the file
-  console.log(singleUser);
+  console.log('pppppp', product);
 
   return {
     props: {
-      singleUser,
+      product,
     },
   };
 }

@@ -55,7 +55,7 @@ export default function Users(props) {
                   <a>
                     <img
                       style={{ borderRadius: '5px' }}
-                      src={user.img}
+                      src={`/${user.name}.gif`}
                       alt={user.name}
                     />
                   </a>
@@ -76,6 +76,7 @@ export async function getServerSideProps(context) {
   // get server site only work on pages and not components
   // to get access the request (context)
   const { getProducts } = await import('../../util/database');
+  console.log(await getProducts());
   const products = await getProducts();
 
   const cookies = context.req.cookies.like || '[]';

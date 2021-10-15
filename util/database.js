@@ -6,18 +6,39 @@ import postgres from 'postgres';
 // in the .env file, making it possible
 // to connect to PostgresSQL
 dotenvSafe.config();
+
 // connect toPostgresSQL
 const sql = postgres();
 sql`SELECT 1;`.then((result) => console.log(result));
 
+// postgres js will always giv back an array
 // to get data from real database using function
 export async function getProducts() {
   const products = await sql`
       SELECT * FROM products`;
-  console.log('proooo', products);
-  products.map((product) => {
+  // console.log('proooo', products);
+  return products.map((product) => {
     return camelcaseKeys(product);
   });
+}
+
+// for single page used single retrievement
+// passing of idfromurl context.query.userid
+export async function getProduct(id) {
+  const products = await sql`
+      SELECT
+      *
+      FROM
+       products
+      Where
+       id = ${id}
+      `;
+
+  // change this map to return single object as postgres always return array
+  // return products.map((product) => {
+  //   return camelcaseKeys(product);
+  // });
+  return camelcaseKeys(products[0]);
 }
 // THIS FILE IS NODE:JS WORKING
 

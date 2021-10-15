@@ -1,23 +1,25 @@
 import { css } from '@emotion/react';
 import Link from 'next/link';
+import Users from '../pages/productsFolder/[productId]';
 
 const navStyle = css`
   background-color: #333;
-  padding: 20px 64px;
+  padding: 30px 54px;
 
   a {
     color: #f2f2f2;
     text-align: center;
-    padding: 14px 36px;
+    padding: 30px 56px;
     text-decoration: none;
-    font-size: 17px;
+    font-size: 24px;
   }
   a:hover {
     background-color: #111;
+    color: orange;
   }
 `;
 
-export default function Header() {
+export default function Header(props) {
   return (
     <nav css={navStyle}>
       <Link href="/">
